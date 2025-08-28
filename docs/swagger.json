@@ -1,0 +1,199 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/account": {
+            "post": {
+                "description": "Create a new account (payment wallet) for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Create a new account",
+                "parameters": [
+                    {
+                        "description": "Account creation details",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Account created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/CreateAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "CreateAccountRequest": {
+            "type": "object",
+            "required": [
+                "account_name",
+                "currency"
+            ],
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 3
+                },
+                "currency": {
+                    "enum": [
+                        "SAR",
+                        "USD"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ledger.CurrencyType"
+                        }
+                    ]
+                }
+            }
+        },
+        "CreateAccountResponse": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/ledger.Account"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Account created successfully"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string",
+                    "example": "Field validation failed"
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request data"
+                }
+            }
+        },
+        "ledger.Account": {
+            "type": "object",
+            "required": [
+                "account_name",
+                "currency"
+            ],
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 3
+                },
+                "balance": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "enum": [
+                        "SAR",
+                        "USD"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ledger.CurrencyType"
+                        }
+                    ]
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ledger.Transaction"
+                    }
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "ledger.CurrencyType": {
+            "type": "string",
+            "enum": [
+                "SAR",
+                "USD"
+            ],
+            "x-enum-varnames": [
+                "CurrencySAR",
+                "CurrencyUSD"
+            ]
+        },
+        "ledger.Transaction": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/ledger.Account"
+                },
+                "accountUUID": {
+                    "type": "string"
+                },
+                "afterBalance": {
+                    "type": "integer"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "idempotencyID": {
+                    "type": "string"
+                },
+                "trxType": {
+                    "$ref": "#/definitions/ledger.TransactionType"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "ledger.TransactionType": {
+            "type": "string",
+            "enum": [
+                "CREDIT",
+                "DEBIT",
+                "TOP_UP"
+            ],
+            "x-enum-varnames": [
+                "TransactionCredit",
+                "TransactionDebit",
+                "TransactionTopUp"
+            ]
+        }
+    }
+}

@@ -3,9 +3,12 @@ package main
 import (
 	"log"
 	"simple/payment-wallet/core"
+	"simple/payment-wallet/docs"
 	"simple/payment-wallet/ledger"
 
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -13,6 +16,7 @@ func main() {
 	core.ConnectToDB(config)
 
 	r := gin.Default()
+	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	// config is now part of fin ctx
 	r.Use(func(c *gin.Context) {
@@ -22,6 +26,11 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	ledger.SetupRouter(v1)
+
+	r.GET(
+		"/swagger/*any",
+		ginSwagger.WrapHandler(swaggerfiles.Handler),
+	)
 
 	log.Println("Starting server on :8080")
 	if err := r.Run(":8080"); err != nil {

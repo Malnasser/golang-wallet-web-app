@@ -1,0 +1,131 @@
+definitions:
+  CreateAccountRequest:
+    properties:
+      account_name:
+        maxLength: 255
+        minLength: 3
+        type: string
+      currency:
+        allOf:
+        - $ref: '#/definitions/ledger.CurrencyType'
+        enum:
+        - SAR
+        - USD
+    required:
+    - account_name
+    - currency
+    type: object
+  CreateAccountResponse:
+    properties:
+      account:
+        $ref: '#/definitions/ledger.Account'
+      message:
+        example: Account created successfully
+        type: string
+    type: object
+  ErrorResponse:
+    properties:
+      details:
+        example: Field validation failed
+        type: string
+      error:
+        example: Invalid request data
+        type: string
+    type: object
+  ledger.Account:
+    properties:
+      account_name:
+        maxLength: 255
+        minLength: 3
+        type: string
+      balance:
+        type: integer
+      created_at:
+        type: string
+      currency:
+        allOf:
+        - $ref: '#/definitions/ledger.CurrencyType'
+        enum:
+        - SAR
+        - USD
+      transactions:
+        items:
+          $ref: '#/definitions/ledger.Transaction'
+        type: array
+      uuid:
+        type: string
+    required:
+    - account_name
+    - currency
+    type: object
+  ledger.CurrencyType:
+    enum:
+    - SAR
+    - USD
+    type: string
+    x-enum-varnames:
+    - CurrencySAR
+    - CurrencyUSD
+  ledger.Transaction:
+    properties:
+      account:
+        $ref: '#/definitions/ledger.Account'
+      accountUUID:
+        type: string
+      afterBalance:
+        type: integer
+      amount:
+        type: integer
+      createdAt:
+        type: string
+      idempotencyID:
+        type: string
+      trxType:
+        $ref: '#/definitions/ledger.TransactionType'
+      uuid:
+        type: string
+    type: object
+  ledger.TransactionType:
+    enum:
+    - CREDIT
+    - DEBIT
+    - TOP_UP
+    type: string
+    x-enum-varnames:
+    - TransactionCredit
+    - TransactionDebit
+    - TransactionTopUp
+info:
+  contact: {}
+paths:
+  /account:
+    post:
+      consumes:
+      - application/json
+      description: Create a new account (payment wallet) for the user
+      parameters:
+      - description: Account creation details
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/CreateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Account created successfully
+          schema:
+            $ref: '#/definitions/CreateAccountResponse'
+        "400":
+          description: Bad request - invalid input
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a new account
+      tags:
+      - Accounts
+swagger: "2.0"
