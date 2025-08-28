@@ -32,6 +32,49 @@ definitions:
         example: Invalid request data
         type: string
     type: object
+  ListAccountsResponse:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/ledger.Account'
+        type: array
+      pagination:
+        $ref: '#/definitions/PaginationResponse'
+    type: object
+  PaginationResponse:
+    properties:
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 10
+        type: integer
+      total_count:
+        example: 100
+        type: integer
+      total_pages:
+        example: 10
+        type: integer
+    type: object
+  TopUpAccountRequest:
+    properties:
+      amount:
+        example: 42
+        type: integer
+      idempotencyId:
+        example: 431e0419-23f3-41e4-a27e-a89815948be1
+        type: string
+    type: object
+  TopUpAccountResponse:
+    properties:
+      Account:
+        $ref: '#/definitions/ledger.Account'
+      Transaction:
+        $ref: '#/definitions/ledger.Transaction'
+      message:
+        example: Account topped up successfully
+        type: string
+    type: object
   ledger.Account:
     properties:
       account_name:
@@ -98,7 +141,40 @@ definitions:
 info:
   contact: {}
 paths:
-  /account:
+  /accounts:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of accounts
+      parameters:
+      - default: 1
+        description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 'Number of items per page (default: 10)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Accounts retrieved successfully
+          schema:
+            $ref: '#/definitions/ListAccountsResponse'
+        "400":
+          description: Bad request - invalid pagination parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: List all accounts with pagination
+      tags:
+      - Accounts
     post:
       consumes:
       - application/json
@@ -126,6 +202,46 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Create a new account
+      tags:
+      - Accounts
+  /accounts/{account_uuid}/top-up:
+    post:
+      consumes:
+      - application/json
+      description: Add funds to a specific account by account ID
+      parameters:
+      - description: Account UUID
+        example: cff6f6f3-e440-460f-99e5-7ee0d4f20125
+        in: path
+        name: account_uuid
+        required: true
+        type: string
+      - description: Top up details
+        in: body
+        name: topup
+        required: true
+        schema:
+          $ref: '#/definitions/TopUpAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account topped up successfully
+          schema:
+            $ref: '#/definitions/TopUpAccountResponse'
+        "400":
+          description: Bad request - invalid input
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Top up an account
       tags:
       - Accounts
 swagger: "2.0"

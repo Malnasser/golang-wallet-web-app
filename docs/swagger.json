@@ -4,7 +4,56 @@
         "contact": {}
     },
     "paths": {
-        "/account": {
+        "/accounts": {
+            "get": {
+                "description": "Get a paginated list of accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "List all accounts with pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page (default: 10)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Accounts retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/ListAccountsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid pagination parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new account (payment wallet) for the user",
                 "consumes": [
@@ -37,6 +86,66 @@
                     },
                     "400": {
                         "description": "Bad request - invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{account_uuid}/top-up": {
+            "post": {
+                "description": "Add funds to a specific account by account ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Top up an account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "cff6f6f3-e440-460f-99e5-7ee0d4f20125",
+                        "description": "Account UUID",
+                        "name": "account_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Top up details",
+                        "name": "topup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TopUpAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account topped up successfully",
+                        "schema": {
+                            "$ref": "#/definitions/TopUpAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
@@ -99,6 +208,69 @@
                 "error": {
                     "type": "string",
                     "example": "Invalid request data"
+                }
+            }
+        },
+        "ListAccountsResponse": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ledger.Account"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/PaginationResponse"
+                }
+            }
+        },
+        "PaginationResponse": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "total_count": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "TopUpAccountRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "idempotencyId": {
+                    "type": "string",
+                    "example": "431e0419-23f3-41e4-a27e-a89815948be1"
+                }
+            }
+        },
+        "TopUpAccountResponse": {
+            "type": "object",
+            "properties": {
+                "Account": {
+                    "$ref": "#/definitions/ledger.Account"
+                },
+                "Transaction": {
+                    "$ref": "#/definitions/ledger.Transaction"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Account topped up successfully"
                 }
             }
         },
