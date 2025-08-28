@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  # PostgreSQL database service
+  db:
+    image: postgres:16.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Golang-migrate service to run migrations
+  migrate:
+    image: migrate/migrate:v4.16.2
+    profiles:
+      - tools
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://user:password@db:5432/app?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

@@ -1,33 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	database "simple/payment-wallet/core"
 	"simple/payment-wallet/ledger"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	l := ledger.NewLedger()
+	database.ConnectToDB()
 
-	aliAcc := l.CreateAccount("Ali")
-	mahmoodAcc := l.CreateAccount("Mahmood")
+	r := gin.Default()
 
-	fmt.Printf("create two account in the ledger: 1. %v, 2. %v \n", aliAcc.Name, mahmoodAcc.Name)
+	v1 := r.Group("/api/v1")
+	ledger.SetupRouter(v1)
 
-	fmt.Printf("toping up %v a 1000 halala \n", aliAcc.Name)
-	l.TopUpAccount(aliAcc, 1000)
-	fmt.Printf("Account '%v' current balance %v \n", aliAcc.Name, aliAcc.Balance)
-
-	fmt.Printf("Transfer 5000 halala from %v to %v \n", aliAcc.Name, mahmoodAcc.Name)
-	_, err := l.FundTransafer(aliAcc, mahmoodAcc, 5000)
-	if err != nil {
-		fmt.Println("Error Transfering fund: ", err.Error())
+	log.Println("Starting server on :8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Failed to start server: ", err)
 	}
-	fmt.Printf("%v & %v balance are %v, %v \n", aliAcc.Name, mahmoodAcc.Name, aliAcc.Balance, mahmoodAcc.Balance)
-
-	fmt.Printf("Transfer 7000 halala from %v to %v \n", aliAcc.Name, mahmoodAcc.Name)
-	_, err = l.FundTransafer(aliAcc, mahmoodAcc, 7000)
-	if err != nil {
-		fmt.Println("Error Transfering fund: ", err.Error())
-	}
-	fmt.Printf("%v & %v balance are %v, %v \n", aliAcc.Name, mahmoodAcc.Name, aliAcc.Balance, mahmoodAcc.Balance)
 }
