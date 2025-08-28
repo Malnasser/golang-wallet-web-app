@@ -1,4 +1,5 @@
-package database
+// core package holds project configurationa and shared functionailities
+package core
 
 import (
 	"log"
@@ -9,8 +10,14 @@ import (
 
 var DB *gorm.DB
 
-func ConnectToDB() {
-	dsn := "host=db user=user password=password dbname=app port=5432 sslmode=disable"
+func ConnectToDB(config *Config) {
+	dsn := "host=" + config.DBHost +
+		" user=" + config.DBUser +
+		" password=" + config.DBPassword +
+		" dbname=" + config.DBName +
+		" port=" + config.DBPort +
+		" sslmode=" + config.DBSSLMode
+
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

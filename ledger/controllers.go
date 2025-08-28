@@ -2,7 +2,7 @@ package ledger
 
 import (
 	"net/http"
-	database "simple/payment-wallet/core"
+	"simple/payment-wallet/core"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +28,7 @@ func createAccount(c *gin.Context) {
 		Currency:    req.Currency,
 	}
 
-	if err := database.DB.Create(&account).Error; err != nil {
+	if err := core.DB.Create(&account).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to create account",
 		})

@@ -2,16 +2,23 @@ package main
 
 import (
 	"log"
-	database "simple/payment-wallet/core"
+	"simple/payment-wallet/core"
 	"simple/payment-wallet/ledger"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	database.ConnectToDB()
+	config := core.LoadConfig()
+	core.ConnectToDB(config)
 
 	r := gin.Default()
+
+	// config is now part of fin ctx
+	r.Use(func(c *gin.Context) {
+		c.Set("config", config)
+		c.Next()
+	})
 
 	v1 := r.Group("/api/v1")
 	ledger.SetupRouter(v1)
