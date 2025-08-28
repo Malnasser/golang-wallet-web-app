@@ -1,6 +1,14 @@
 version: "3.8"
 
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
+
   # PostgreSQL database service
   db:
     image: postgres:16.1-alpine
